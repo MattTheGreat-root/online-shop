@@ -1,0 +1,36 @@
+@startuml
+!include style.puml
+!pragma layout smetana
+allowmixing
+skinparam ComponentBorderColor #34465b
+skinparam ComponentBackgroundColor #f2f5f8
+skinparam nodesep 52
+title Component diagram / Online shop
+
+component "Main\nBootstrap and demo seeding" as bootstrap
+component "Console UI\nShopCli, menus and ConsoleIO" as cli
+component "Service assembly\nShopServices.inMemory()" as assembly
+component "Shop services\nCatalog, account, cart, order,\npayment and review use cases" as services
+component "Domain model\nEntities, value objects and rules" as model
+component "DataStore\nIn-memory collections" as data
+component "SimulatedPaymentGateway" as simulator
+interface "ShopStorage" as storage {
+}
+interface "PaymentGateway" as gateway {
+}
+
+bootstrap ..> assembly : assemble and seed
+bootstrap ..> cli : start
+cli ..> assembly : get wired services
+cli ..> services : invoke use cases
+cli ..> simulator : select next outcome
+assembly ..> services
+assembly ..> data : create
+assembly ..> simulator
+services ..> model
+services ..> storage
+data ..|> storage
+data ..> model
+services ..> gateway : charge
+simulator ..|> gateway
+@enduml
