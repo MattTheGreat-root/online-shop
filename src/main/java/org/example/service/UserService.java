@@ -11,10 +11,10 @@ import java.util.List;
 
 public class UserService {
 
-    private final DataStore store;
+    private final ShopStorage.UserProfiles store;
     private final AccessPolicy access;
 
-    public UserService(DataStore store) {
+    public UserService(ShopStorage.UserProfiles store) {
         this.store = store;
         this.access = new AccessPolicy(store);
     }
@@ -60,7 +60,7 @@ public class UserService {
         if (contact == null) {
             return;
         }
-        boolean usedByOthers = store.users().values().stream()
+        boolean usedByOthers = store.listUsers().stream()
                 .anyMatch(other -> !other.getId().equals(userId) && other.hasContact(contact));
         if (usedByOthers) {
             throw new DomainException(contact + " is already used by another account");
