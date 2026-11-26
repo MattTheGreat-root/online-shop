@@ -1,0 +1,23 @@
+@startuml
+!include style.puml
+!pragma layout smetana
+skinparam NodeBorderColor #34465b
+skinparam NodeBackgroundColor #f2f5f8
+skinparam ComponentBorderColor #34465b
+skinparam ComponentBackgroundColor white
+title Deployment diagram / Local console run
+
+actor "Shop user" as user
+node "Local machine" <<device>> as host {
+  node "Terminal" <<executionEnvironment>> as terminal
+  node "Java application process (JVM)" <<executionEnvironment>> as jvm {
+    artifact "Online Shop\nCompiled Java classes" as app
+    component "DataStore\nIn-memory shop state" as store
+    component "SimulatedPaymentGateway\nLocal simulator" as gateway
+    app ..> store : read and update
+    app ..> gateway : simulate charge
+  }
+  terminal <--> app : System.in / System.out\nvia ConsoleIO
+}
+user <--> terminal : keyboard / display
+@enduml
