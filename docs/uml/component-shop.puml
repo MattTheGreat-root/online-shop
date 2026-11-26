@@ -1,8 +1,10 @@
 @startuml
 !include style.puml
 !pragma layout smetana
+allowmixing
 skinparam ComponentBorderColor #34465b
 skinparam ComponentBackgroundColor #f2f5f8
+skinparam nodesep 52
 title Component diagram / Online shop
 
 component "Main\nBootstrap and demo seeding" as bootstrap
@@ -12,21 +14,23 @@ component "Shop services\nCatalog, account, cart, order,\npayment and review use
 component "Domain model\nEntities, value objects and rules" as model
 component "DataStore\nIn-memory collections" as data
 component "SimulatedPaymentGateway" as simulator
-interface "ShopStorage\nUse-case interfaces" as storage
-interface "PaymentGateway" as gateway
+interface "ShopStorage" as storage {
+}
+interface "PaymentGateway" as gateway {
+}
 
 bootstrap ..> assembly : assemble and seed
 bootstrap ..> cli : start
 cli ..> assembly : get wired services
 cli ..> services : invoke use cases
 cli ..> simulator : select next outcome
-assembly ..> services : construct
-assembly ..> data : create shared instance
-assembly ..> simulator : create shared instance
-services ..> model : apply domain rules
-services ..> storage : read and write
-data ..|> storage : implement
-data ..> model : hold instances
+assembly ..> services
+assembly ..> data : create
+assembly ..> simulator
+services ..> model
+services ..> storage
+data ..|> storage
+data ..> model
 services ..> gateway : charge
-simulator ..|> gateway : implement
+simulator ..|> gateway
 @enduml
