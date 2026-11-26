@@ -9,10 +9,10 @@ import java.util.List;
 
 public class CartService {
 
-    private final DataStore store;
+    private final ShopStorage.Carts store;
     private final AccessPolicy access;
 
-    public CartService(DataStore store) {
+    public CartService(ShopStorage.Carts store) {
         this.store = store;
         this.access = new AccessPolicy(store);
     }
