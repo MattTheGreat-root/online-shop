@@ -1,0 +1,9 @@
+target/
+.idea/
+*.iml
+out/
+.DS_Store
+/tmp/
+/output/
+/domain2.pdf
+/بخش دوم فاز اول پروژه -2.pdf
