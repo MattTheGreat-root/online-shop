@@ -1,0 +1,66 @@
+@startuml
+!include style.puml
+!pragma layout smetana
+title Object diagram / First successful payment for two books
+
+object "customer : User" as customer {
+  id = "U2"
+  fullName = "Demo Student"
+  role = CUSTOMER
+}
+object "home : Address" as address {
+  id = "A1"
+  title = "Home"
+}
+object "shipping : AddressDetails" as shipping {
+  recipientName = "Demo Student"
+  city = "Tehran"
+}
+object "cart : Cart" as cart {
+  customerId = "U2"
+  items = {}
+}
+object "order : Order" as order {
+  id = "O1"
+  customerId = "U2"
+  status = PAID
+  totalAmount = Money(1900000)
+}
+object "line : OrderItem" as line {
+  productId = "P4"
+  productName = "Clean Code"
+  unitPrice = Money(950000)
+  quantity = 2
+}
+object "book : Product" as book {
+  id = "P4"
+  name = "Clean Code"
+  stock = 18
+  soldCount = 2
+}
+object "books : Category" as category {
+  id = "C3"
+  name = "Book"
+}
+object "payment : Payment" as payment {
+  id = "PAY1"
+  orderId = "O1"
+  amount = Money(1900000)
+  status = SUCCESSFUL
+  gatewayReference = "GW-1"
+}
+customer -- address : addresses
+address -- shipping : details
+order -- shipping : shippingAddress
+order -- line : items
+book -- category : category
+cart .. customer : customerId
+order .. customer : customerId
+line .. book : productId
+payment .. order : orderId
+
+legend bottom
+  Solid lines show object references. Dashed lines show IDs.
+  Amounts are in Toman.
+endlegend
+@enduml
