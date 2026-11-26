@@ -1,0 +1,110 @@
+@startuml
+!include style.puml
+!pragma layout smetana
+hide empty members
+skinparam classAttributeIconSize 0
+title Class diagram / Domain model
+
+class User {
+  -id: String
+  -fullName: String
+  -role: UserRole
+  -active: boolean
+  +checkPassword(rawPassword): boolean
+  +findAddress(addressId): Address
+}
+class Session {
+  -userId: String
+  -active: boolean
+  +end()
+}
+class Address {
+  -id: String
+  -title: String
+  -defaultAddress: boolean
+  +update(title, details)
+}
+class AddressDetails <<record>> {
+  recipientName: String
+  phone: PhoneNumber
+  country: String
+  city: String
+  street: String
+  postalCode: String
+}
+class Category {
+  -id: String
+  -name: String
+  -active: boolean
+}
+class Product {
+  -id: String
+  -name: String
+  -price: Money
+  -stock: int
+  -soldCount: int
+  +canBePurchased(quantity): boolean
+  +recordSale(quantity)
+}
+class Cart {
+  -customerId: String
+  +add(product, quantity)
+  +clear()
+}
+class CartItem {
+  -productId: String
+  -quantity: int
+}
+class Order {
+  -id: String
+  -customerId: String
+  -totalAmount: Money
+  -status: OrderStatus
+  +isPayable(): boolean
+  +markAsPaid()
+}
+class OrderItem <<record>> {
+  productId: String
+  productName: String
+  unitPrice: Money
+  quantity: int
+  +subtotal(): Money
+}
+class Payment {
+  -id: String
+  -orderId: String
+  -amount: Money
+  -status: PaymentStatus
+  -gatewayReference: String
+  +isSuccessful(): boolean
+}
+class Review {
+  -productId: String
+  -customerId: String
+  -rating: Rating
+  -text: String
+}
+class StockChange <<record>> {
+  productId: String
+  adminId: String
+  oldStock: int
+  newStock: int
+}
+
+User "1" *-- "0..*" Address : addresses
+Address "0..*" --> "1" AddressDetails : details
+Session ..> User : userId
+Cart ..> User : customerId
+Cart "1" *-- "0..*" CartItem : items
+CartItem ..> Product : productId
+Product "0..*" --> "1" Category : category
+Order ..> User : customerId
+Order "1" *-- "1..*" OrderItem : items
+Order "0..*" --> "1" AddressDetails : shippingAddress
+OrderItem ..> Product : productId
+Payment ..> Order : orderId
+Review ..> User : customerId
+Review ..> Product : productId
+StockChange ..> Product : productId
+StockChange ..> User : adminId
+@enduml

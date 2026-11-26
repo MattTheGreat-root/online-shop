@@ -1,0 +1,64 @@
+@startuml
+!include style.puml
+!pragma layout smetana
+left to right direction
+hide empty members
+skinparam classAttributeIconSize 0
+title Class diagram / Service dependencies
+
+class AuthService
+class UserService
+class CategoryService
+class ProductService
+class CartService
+class OrderService
+class PaymentService
+class ReviewService
+class AccessPolicy
+class DataStore
+class ProductSearch
+interface ProductRatings {
+  +averageRating(productId): double
+}
+interface PaymentGateway {
+  +charge(orderId, amount): GatewayResult
+}
+class SimulatedPaymentGateway
+package ShopStorage <<Frame>> {
+  interface UserLookup
+  interface Authentication
+  interface UserProfiles
+  interface Categories
+  interface Catalog
+  interface Carts
+  interface Orders
+  interface Payments
+  interface Reviews
+}
+
+AuthService --> Authentication
+UserService --> UserProfiles
+CategoryService --> Categories
+ProductService --> Catalog
+CartService --> Carts
+OrderService --> Orders
+PaymentService --> Payments
+ReviewService --> Reviews
+PaymentService --> AccessPolicy
+AccessPolicy --> UserLookup
+Authentication --|> UserProfiles
+UserProfiles --|> UserLookup
+Orders --|> Carts
+DataStore ..|> Authentication
+DataStore ..|> Categories
+DataStore ..|> Catalog
+DataStore ..|> Orders
+DataStore ..|> Payments
+DataStore ..|> Reviews
+
+ProductService --> ProductSearch
+ProductSearch --> ProductRatings
+ReviewService ..|> ProductRatings
+PaymentService --> PaymentGateway
+SimulatedPaymentGateway ..|> PaymentGateway
+@enduml

@@ -1,0 +1,12 @@
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 14
+skinparam ArrowColor #34465b
+skinparam ClassBorderColor #34465b
+skinparam ClassBackgroundColor #f2f5f8
+skinparam ObjectBorderColor #34465b
+skinparam ObjectBackgroundColor #f2f5f8
+skinparam ParticipantBorderColor #34465b
+skinparam ParticipantBackgroundColor #f2f5f8
+skinparam roundcorner 0
