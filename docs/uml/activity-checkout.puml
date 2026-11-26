@@ -1,0 +1,75 @@
+@startuml
+!include style.puml
+title Activity diagram / Checkout and payment
+
+start
+partition "CustomerMenu / Checkout" {
+  :Show cart and saved addresses;
+  :Read shipping address ID;
+}
+partition "OrderService.checkout" {
+  :Require customer and load cart;
+  if (Cart has items?) then (yes)
+  else (no)
+    :Report empty cart;
+    stop
+  endif
+  if (Address belongs to customer?) then (yes)
+  else (no)
+    :Report invalid address;
+    stop
+  endif
+  :Check each cart item's product and stock;
+  if (All items purchasable?) then (yes)
+  else (no)
+    :Report product or stock error;
+    stop
+  endif
+  :Copy item and shipping details;
+  :Save PENDING_PAYMENT order;
+  :Clear cart;
+}
+partition "CustomerMenu / Orders and Payment" {
+  :Show order ID and total;
+  if (Pay now?) then (yes)
+    :Use new order ID;
+  else (later)
+    :Return to menu with order pending;
+    :Later, choose Pay an order and enter its ID;
+  endif
+  :Load customer's order;
+  if (Order found, owned and payable?) then (yes)
+    :Choose simulated gateway outcome;
+  else (no)
+    :Show order error or already-paid message;
+    stop
+  endif
+}
+partition "PaymentService.payOrder" {
+  :Recheck customer, ownership and payable status;
+  :Recheck each order item's product and stock;
+  if (Checks pass?) then (yes)
+  else (no)
+    :Report error before charging;
+    stop
+  endif
+  :Charge order total through PaymentGateway;
+  if (Gateway reports success?) then (yes)
+    if (Paid amount equals total?) then (yes)
+      :Save SUCCESSFUL payment;
+      :Mark order PAID;
+      :Decrease stock and increase sold count;
+    else (no)
+      :Save REJECTED payment;
+      :Leave order pending;
+    endif
+  else (no)
+    :Save FAILED payment;
+    :Leave order pending;
+  endif
+}
+partition CustomerMenu {
+  :Show payment outcome and return to menu;
+}
+stop
+@enduml

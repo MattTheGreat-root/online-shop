@@ -9,11 +9,11 @@ import org.example.model.Product;
 
 public class PaymentService {
 
-    private final DataStore store;
+    private final ShopStorage.Payments store;
     private final AccessPolicy access;
     private final PaymentGateway gateway;
 
-    public PaymentService(DataStore store, PaymentGateway gateway) {
+    public PaymentService(ShopStorage.Payments store, PaymentGateway gateway) {
         this.store = store;
         this.access = new AccessPolicy(store);
         this.gateway = gateway;
@@ -33,7 +33,7 @@ public class PaymentService {
         GatewayResult result = gateway.charge(orderId, order.getTotalAmount());
         PaymentStatus status = decideStatus(order, result);
         Payment payment = new Payment(store.nextId("PAY"), orderId, result.paidAmount(), status, result.reference());
-        store.payments().put(payment.getId(), payment);
+        store.addPayment(payment);
 
         if (payment.isSuccessful()) {
             order.markAsPaid();

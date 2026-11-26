@@ -1,21 +1,42 @@
-# Online Shop (Software Design Principles, Phase 1 - Part 2)
+# Online Shop
 
-Console online shop in Java 17 with three layers:
+A Java 17 console shop for the Software Design Principles course at Amirkabir University of Technology. Guests browse the catalog, customers place orders and leave reviews after purchase, and admins manage the catalog and stock. The app starts with demo products and keeps shop data in memory for the duration of the run.
 
-- `model` - entities, value objects and business rules (no dependency on other layers)
-- `service` - use cases (auth, users, products, cart, orders, payment, reviews) and in-memory storage (`DataStore`)
-- `cli` - terminal menus for guest, customer and admin
-- `Main` - wires everything and starts the CLI
+## Team
+
+| Member | Phase 2 work |
+| --- | --- |
+| محمدمتین توکلی | SOLID refactor, class and object diagrams, payment sequence diagram |
+| رادین احمدزاده | Activity, component and deployment diagrams, final design PDF |
 
 ## Run
 
-Open the folder in IntelliJ IDEA as a Maven project and run `org.example.Main`,
-or from a terminal:
+Use JDK 17 or newer and Maven. In IntelliJ IDEA, import the Maven project and run `org.example.Main`. From a terminal:
 
-```
+```sh
 mvn compile
 java -cp target/classes org.example.Main
 ```
 
-Demo admin: `admin@shop.com` / `admin123`. Customers can register from the first menu.
-The payment gateway is simulated; before each payment you choose success, failure or wrong amount.
+The demo admin logs in with `admin@shop.com` and `admin123`. Create a customer from the main menu to try checkout. Add a shipping address under **My Account**, add an item to **My Cart**, and open **Orders and Payment**. The payment menu lets you choose a success, a failure, or a wrong amount. A failed or rejected attempt leaves the order pending so you can try again.
+
+## Source layout
+
+- `org.example.model` holds entities, value objects, and domain rules.
+- `org.example.service` handles shop use cases. `ShopServices.inMemory()` wires the services to `DataStore` and the simulated payment gateway.
+- `org.example.cli` handles the terminal menus, input and output.
+- `org.example.Main` seeds the demo data and starts the CLI.
+
+## Design
+
+- [Phase 2 design report (PDF)](docs/design.pdf)
+- [Diagram sources](docs/uml/)
+- [System overview and SOLID notes](docs/design-notes.md)
+
+Render the PlantUML diagram sources as SVG from the repository root with a local PlantUML JAR:
+
+```sh
+java -Djava.awt.headless=true -jar /path/to/plantuml.jar -charset UTF-8 -tsvg -o /tmp/online-shop-uml \
+  docs/uml/class-*.puml docs/uml/object-*.puml docs/uml/activity-*.puml \
+  docs/uml/component-*.puml docs/uml/deployment-*.puml docs/uml/sequence-*.puml
+```

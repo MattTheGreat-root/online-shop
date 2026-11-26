@@ -4,9 +4,9 @@ import org.example.model.User;
 
 class AccessPolicy {
 
-    private final DataStore store;
+    private final ShopStorage.UserLookup store;
 
-    AccessPolicy(DataStore store) {
+    AccessPolicy(ShopStorage.UserLookup store) {
         this.store = store;
     }
 

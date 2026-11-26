@@ -15,10 +15,10 @@ public class AuthService {
 
     private static final int RESET_CODE_BOUND = 1_000_000;
 
-    private final DataStore store;
+    private final ShopStorage.Authentication store;
     private final SecureRandom random = new SecureRandom();
 
-    public AuthService(DataStore store) {
+    public AuthService(ShopStorage.Authentication store) {
         this.store = store;
     }
 
@@ -36,15 +36,12 @@ public class AuthService {
                 .filter(User::isActive)
                 .orElseThrow(() -> new DomainException("Login information is not correct"));
         Session session = new Session(store.nextId("S"), user.getId());
-        store.sessions().put(session.getId(), session);
+        store.addSession(session);
         return session;
     }
 
     public void logout(String sessionId) {
-        Session session = store.sessions().get(sessionId);
-        if (session != null) {
-            session.end();
-        }
+        store.findSession(sessionId).ifPresent(Session::end);
     }
 
     public User currentUser(Session session) {
@@ -62,19 +59,18 @@ public class AuthService {
         User user = findByContact(contact)
                 .orElseThrow(() -> new NotFoundException("No account is registered with " + contact));
         String code = String.format("%06d", random.nextInt(RESET_CODE_BOUND));
-        store.passwordResetCodes().put(user.getId(), code);
+        store.saveResetCode(user.getId(), code);
         return code;
     }
 
     public void resetPassword(String contact, String code, String newRawPassword) {
         User user = findByContact(contact)
                 .orElseThrow(() -> new NotFoundException("No account is registered with " + contact));
-        String expectedCode = store.passwordResetCodes().get(user.getId());
-        if (expectedCode == null || !expectedCode.equals(code)) {
+        if (store.findResetCode(user.getId()).filter(expected -> expected.equals(code)).isEmpty()) {
             throw new DomainException("Verification code is not correct");
         }
         user.changePassword(PasswordHash.fromRawPassword(newRawPassword));
-        store.passwordResetCodes().remove(user.getId());
+        store.removeResetCode(user.getId());
     }
 
     private User createUser(String fullName, String contact, String rawPassword, UserRole role) {
@@ -83,7 +79,7 @@ public class AuthService {
         PhoneNumber phone = email == null ? new PhoneNumber(contact) : null;
         User user = new User(store.nextId("U"), fullName, email, phone,
                 PasswordHash.fromRawPassword(rawPassword), role);
-        store.users().put(user.getId(), user);
+        store.addUser(user);
         return user;
     }
 
@@ -97,7 +93,7 @@ public class AuthService {
     }
 
     Optional<User> findByContact(String contact) {
-        return store.users().values().stream()
+        return store.listUsers().stream()
                 .filter(user -> user.hasContact(contact))
                 .findFirst();
     }
