@@ -15,10 +15,10 @@ import java.util.List;
 
 public class OrderService {
 
-    private final DataStore store;
+    private final ShopStorage.Orders store;
     private final AccessPolicy access;
 
-    public OrderService(DataStore store) {
+    public OrderService(ShopStorage.Orders store) {
         this.store = store;
         this.access = new AccessPolicy(store);
     }
@@ -34,14 +34,14 @@ public class OrderService {
                 .map(this::toOrderItem)
                 .toList();
         Order order = new Order(store.nextId("O"), customerId, items, address.getDetails());
-        store.orders().put(order.getId(), order);
+        store.addOrder(order);
         cart.clear();
         return order;
     }
 
     public List<Order> listCustomerOrders(String customerId) {
         access.requireCustomer(customerId);
-        return store.orders().values().stream()
+        return store.listOrders().stream()
                 .filter(order -> order.isOwnedBy(customerId))
                 .toList();
     }
@@ -57,7 +57,7 @@ public class OrderService {
 
     public List<Order> listAllOrders(String adminId, OrderStatus statusFilter) {
         access.requireAdmin(adminId);
-        return store.orders().values().stream()
+        return store.listOrders().stream()
                 .filter(order -> statusFilter == null || order.getStatus() == statusFilter)
                 .toList();
     }
@@ -68,7 +68,7 @@ public class OrderService {
     }
 
     public List<Payment> listPayments(String orderId) {
-        return store.payments().values().stream()
+        return store.listPayments().stream()
                 .filter(payment -> payment.getOrderId().equals(orderId))
                 .toList();
     }

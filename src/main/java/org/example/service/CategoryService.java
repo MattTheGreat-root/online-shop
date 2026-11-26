@@ -8,28 +8,28 @@ import java.util.List;
 
 public class CategoryService {
 
-    private final DataStore store;
+    private final ShopStorage.Categories store;
     private final AccessPolicy access;
 
-    public CategoryService(DataStore store) {
+    public CategoryService(ShopStorage.Categories store) {
         this.store = store;
         this.access = new AccessPolicy(store);
     }
 
     public Category createCategory(String adminId, String name) {
         access.requireAdmin(adminId);
-        boolean duplicate = store.categories().values().stream()
+        boolean duplicate = store.listCategories().stream()
                 .anyMatch(category -> category.getName().equalsIgnoreCase(name == null ? "" : name.trim()));
         if (duplicate) {
             throw new DomainException("A category with this name already exists");
         }
         Category category = new Category(store.nextId("C"), name);
-        store.categories().put(category.getId(), category);
+        store.addCategory(category);
         return category;
     }
 
     public List<Category> listActiveCategories() {
-        return store.categories().values().stream()
+        return store.listCategories().stream()
                 .filter(Category::isActive)
                 .toList();
     }
@@ -39,7 +39,7 @@ public class CategoryService {
         if (!category.isActive()) {
             throw new NotFoundException("Category not found: " + categoryId);
         }
-        return store.products().values().stream()
+        return store.listProducts().stream()
                 .filter(Product::isActive)
                 .filter(product -> product.getCategory().getId().equals(categoryId))
                 .toList();

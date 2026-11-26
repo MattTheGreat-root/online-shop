@@ -15,11 +15,13 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * In-memory storage shared by all services. Nothing is persisted after the program exits.
  */
-public class DataStore {
+public class DataStore implements ShopStorage.Authentication, ShopStorage.Categories,
+        ShopStorage.Catalog, ShopStorage.Orders, ShopStorage.Payments, ShopStorage.Reviews {
 
     private final Map<String, User> users = new LinkedHashMap<>();
     private final Map<String, Session> sessions = new HashMap<>();
@@ -33,28 +35,34 @@ public class DataStore {
     private final List<StockChange> stockChanges = new ArrayList<>();
     private final Map<String, Integer> idCounters = new HashMap<>();
 
-    String nextId(String prefix) {
+    @Override
+    public String nextId(String prefix) {
         int next = idCounters.merge(prefix, 1, Integer::sum);
         return prefix + next;
     }
 
-    User findUser(String userId) {
+    @Override
+    public User findUser(String userId) {
         return require(users.get(userId), "User not found: " + userId);
     }
 
-    Category findCategory(String categoryId) {
+    @Override
+    public Category findCategory(String categoryId) {
         return require(categories.get(categoryId), "Category not found: " + categoryId);
     }
 
-    Product findProduct(String productId) {
+    @Override
+    public Product findProduct(String productId) {
         return require(products.get(productId), "Product not found: " + productId);
     }
 
-    Order findOrder(String orderId) {
+    @Override
+    public Order findOrder(String orderId) {
         return require(orders.get(orderId), "Order not found: " + orderId);
     }
 
-    Cart cartOf(String customerId) {
+    @Override
+    public Cart cartOf(String customerId) {
         return carts.computeIfAbsent(customerId, Cart::new);
     }
 
@@ -65,39 +73,98 @@ public class DataStore {
         return value;
     }
 
-    Map<String, User> users() {
-        return users;
+    @Override
+    public List<User> listUsers() {
+        return List.copyOf(users.values());
     }
 
-    Map<String, Session> sessions() {
-        return sessions;
+    @Override
+    public void addUser(User user) {
+        users.put(user.getId(), user);
     }
 
-    Map<String, String> passwordResetCodes() {
-        return passwordResetCodes;
+    @Override
+    public void addSession(Session session) {
+        sessions.put(session.getId(), session);
     }
 
-    Map<String, Category> categories() {
-        return categories;
+    @Override
+    public Optional<Session> findSession(String sessionId) {
+        return Optional.ofNullable(sessions.get(sessionId));
     }
 
-    Map<String, Product> products() {
-        return products;
+    @Override
+    public void saveResetCode(String userId, String code) {
+        passwordResetCodes.put(userId, code);
     }
 
-    Map<String, Order> orders() {
-        return orders;
+    @Override
+    public Optional<String> findResetCode(String userId) {
+        return Optional.ofNullable(passwordResetCodes.get(userId));
     }
 
-    Map<String, Payment> payments() {
-        return payments;
+    @Override
+    public void removeResetCode(String userId) {
+        passwordResetCodes.remove(userId);
     }
 
-    Map<String, Review> reviews() {
-        return reviews;
+    @Override
+    public List<Category> listCategories() {
+        return List.copyOf(categories.values());
     }
 
-    List<StockChange> stockChanges() {
-        return stockChanges;
+    @Override
+    public void addCategory(Category category) {
+        categories.put(category.getId(), category);
+    }
+
+    @Override
+    public List<Product> listProducts() {
+        return List.copyOf(products.values());
+    }
+
+    @Override
+    public void addProduct(Product product) {
+        products.put(product.getId(), product);
+    }
+
+    @Override
+    public List<Order> listOrders() {
+        return List.copyOf(orders.values());
+    }
+
+    @Override
+    public void addOrder(Order order) {
+        orders.put(order.getId(), order);
+    }
+
+    @Override
+    public List<Payment> listPayments() {
+        return List.copyOf(payments.values());
+    }
+
+    @Override
+    public void addPayment(Payment payment) {
+        payments.put(payment.getId(), payment);
+    }
+
+    @Override
+    public List<Review> listReviews() {
+        return List.copyOf(reviews.values());
+    }
+
+    @Override
+    public void addReview(Review review) {
+        reviews.put(review.getId(), review);
+    }
+
+    @Override
+    public List<StockChange> listStockChanges() {
+        return List.copyOf(stockChanges);
+    }
+
+    @Override
+    public void addStockChange(StockChange change) {
+        stockChanges.add(change);
     }
 }
