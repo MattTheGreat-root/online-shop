@@ -7,7 +7,7 @@ import org.example.model.Review;
 
 import java.util.List;
 
-public class ReviewService {
+public class ReviewService implements ProductRatings {
 
     private final ShopStorage.Reviews store;
     private final AccessPolicy access;
@@ -35,6 +35,7 @@ public class ReviewService {
                 .toList();
     }
 
+    @Override
     public double averageRating(String productId) {
         return store.listReviews().stream()
                 .filter(review -> review.getProductId().equals(productId))
