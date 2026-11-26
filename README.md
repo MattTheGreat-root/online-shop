@@ -29,11 +29,14 @@ The demo admin logs in with `admin@shop.com` and `admin123`. Create a customer f
 
 ## Design
 
+- [Phase 2 design report (PDF)](docs/design.pdf)
 - [Diagram sources](docs/uml/)
 - [System overview and SOLID notes](docs/design-notes.md)
 
 Render the PlantUML diagram sources as SVG from the repository root with a local PlantUML JAR:
 
 ```sh
-java -Djava.awt.headless=true -jar /path/to/plantuml.jar -charset UTF-8 -tsvg -o /tmp/online-shop-uml docs/uml/class-*.puml docs/uml/object-*.puml docs/uml/sequence-*.puml
+java -Djava.awt.headless=true -jar /path/to/plantuml.jar -charset UTF-8 -tsvg -o /tmp/online-shop-uml \
+  docs/uml/class-*.puml docs/uml/object-*.puml docs/uml/activity-*.puml \
+  docs/uml/component-*.puml docs/uml/deployment-*.puml docs/uml/sequence-*.puml
 ```
