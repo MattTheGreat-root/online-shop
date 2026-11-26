@@ -1,0 +1,56 @@
+@startuml
+!include style.puml
+hide footbox
+title Sequence diagram / Pay a pending order
+
+participant "CustomerMenu" as menu
+participant "PaymentService" as payments
+participant "AccessPolicy" as access
+participant "DataStore" as store
+participant "Order" as order
+participant "Product" as product
+participant "SimulatedPaymentGateway" as gateway
+
+note over menu, payments
+  The menu already selected the gateway outcome.
+end note
+menu -> payments : payOrder(customerId, orderId)
+activate payments
+payments -> access : requireCustomer(customerId)
+payments -> store : findOrder(orderId)
+payments -> order : isOwnedBy(customerId)
+payments -> order : isPayable()
+break account or order check fails
+  payments --> menu : exception
+end
+loop each order item
+  payments -> store : findProduct(productId)
+  payments -> product : canBePurchased(quantity)
+  break product missing or unavailable
+    payments --> menu : exception
+  end
+end
+payments -> order : getTotalAmount()
+order --> payments : total
+payments -> gateway : charge(orderId, total)
+gateway --> payments : GatewayResult
+alt gateway failed
+  payments -> payments : decideStatus(order, result): FAILED
+else amount differs
+  payments -> payments : decideStatus(order, result): REJECTED
+else exact amount
+  payments -> payments : decideStatus(order, result): SUCCESSFUL
+end
+payments -> store : nextId("PAY")
+payments -> payments : construct Payment
+payments -> store : addPayment(payment)
+opt payment is SUCCESSFUL
+  payments -> order : markAsPaid()
+  loop each order item
+    payments -> store : findProduct(productId)
+    payments -> product : recordSale(quantity)
+  end
+end
+payments --> menu : Payment
+deactivate payments
+@enduml
